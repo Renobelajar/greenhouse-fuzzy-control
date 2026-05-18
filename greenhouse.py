@@ -78,9 +78,9 @@ simulasi = ctrl.ControlSystemSimulation(greenhouse_ctrl)
 # 5. INPUT PARAMETER DINAMIS (UI SIDEBAR)
 # ==========================================
 st.sidebar.header("Input Parameter Sensor")
-input_suhu = st.sidebar.slider("Suhu Lingkungan (°C)", 0.0, 40.0, 30.0, step=0.5) [cite: 130]
-input_kelembapan = st.sidebar.slider("Kelembapan Tanah (%)", 0.0, 100.0, 35.0, step=1.0) [cite: 131]
-input_cahaya = st.sidebar.slider("Cahaya Matahari (Lux/100)", 0.0, 100.0, 25.0, step=1.0) [cite: 132]
+input_suhu = st.sidebar.slider("Suhu Lingkungan (°C)", 0.0, 40.0, 30.0, step=0.5)
+input_kelembapan = st.sidebar.slider("Kelembapan Tanah (%)", 0.0, 100.0, 35.0, step=1.0)
+input_cahaya = st.sidebar.slider("Cahaya Matahari (Lux/100)", 0.0, 100.0, 25.0, step=1.0)
 
 simulasi.input['suhu'] = input_suhu
 simulasi.input['kelembapan'] = input_kelembapan
@@ -88,9 +88,9 @@ simulasi.input['cahaya'] = input_cahaya
 
 simulasi.compute()
 
-hasil_pompa = simulasi.output['pompa'] [cite: 133]
-hasil_kipas = simulasi.output['kipas'] [cite: 133]
-hasil_lampu = simulasi.output['lampu'] [cite: 133]
+hasil_pompa = simulasi.output['pompa']
+hasil_kipas = simulasi.output['kipas']
+hasil_lampu = simulasi.output['lampu']
 
 # ==========================================
 # 6. MENAMPILKAN ANGKA HASIL DEFUZZIFIKASI
@@ -107,21 +107,20 @@ with col3:
 st.markdown("---")
 
 # ==========================================
-# 7. VISUALISASI MANUAL (GARANSI MUNCUL)
+# 7. VISUALISASI GRAFIK ARSIR HASIL OUTPUT
 # ==========================================
-st.subheader("Grafik Arsir Hasil Defuzzifikasi Pada Kurva Output") [cite: 133]
+st.subheader("Grafik Arsir Hasil Defuzzifikasi Pada Kurva Output")
 
 # --- PLOT 1: POMPA AIR ---
 fig1, ax1 = plt.subplots(figsize=(8, 3.5))
-# Gambar kurva referensi dasar
 ax1.plot(x_pompa, pompa['singkat'].mf, 'b', linewidth=1.5, label='Singkat')
 ax1.plot(x_pompa, pompa['sedang'].mf, 'g', linewidth=1.5, label='Sedang')
 ax1.plot(x_pompa, pompa['lama'].mf, 'r', linewidth=1.5, label='Lama')
-# Hitung tingkat kecocokan untuk arsir hasil
+
 m_singkat = fuzz.interp_membership(x_pompa, pompa['singkat'].mf, hasil_pompa)
 m_sedang  = fuzz.interp_membership(x_pompa, pompa['sedang'].mf, hasil_pompa)
 m_lama    = fuzz.interp_membership(x_pompa, pompa['lama'].mf, hasil_pompa)
-# Lakukan pengarsiran area hasil komputasi
+
 pompa_activation = np.fmax(np.fmin(m_singkat, pompa['singkat'].mf),
                            np.fmax(np.fmin(m_sedang, pompa['sedang'].mf),
                                    np.fmin(m_lama, pompa['lama'].mf)))
@@ -139,9 +138,11 @@ fig2, ax2 = plt.subplots(figsize=(8, 3.5))
 ax2.plot(x_kipas, kipas['lambat'].mf, 'b', linewidth=1.5, label='Lambat')
 ax2.plot(x_kipas, kipas['sedang'].mf, 'g', linewidth=1.5, label='Sedang')
 ax2.plot(x_kipas, kipas['cepat'].mf, 'r', linewidth=1.5, label='Cepat')
+
 m_lambat = fuzz.interp_membership(x_kipas, kipas['lambat'].mf, hasil_kipas)
 m_ksedang = fuzz.interp_membership(x_kipas, kipas['sedang'].mf, hasil_kipas)
 m_cepat   = fuzz.interp_membership(x_kipas, kipas['cepat'].mf, hasil_kipas)
+
 kipas_activation = np.fmax(np.fmin(m_lambat, kipas['lambat'].mf),
                            np.fmax(np.fmin(m_ksedang, kipas['sedang'].mf),
                                    np.fmin(m_cepat, kipas['cepat'].mf)))
@@ -159,9 +160,11 @@ fig3, ax3 = plt.subplots(figsize=(8, 3.5))
 ax3.plot(x_lampu, lampu['mati_redup'].mf, 'b', linewidth=1.5, label='Mati/Redup')
 ax3.plot(x_lampu, lampu['sedang'].mf, 'g', linewidth=1.5, label='Sedang')
 ax3.plot(x_lampu, lampu['terang'].mf, 'r', linewidth=1.5, label='Terang')
+
 m_mredup = fuzz.interp_membership(x_lampu, lampu['mati_redup'].mf, hasil_lampu)
 m_lsedang = fuzz.interp_membership(x_lampu, lampu['sedang'].mf, hasil_lampu)
 m_terang  = fuzz.interp_membership(x_lampu, lampu['terang'].mf, hasil_lampu)
+
 lampu_activation = np.fmax(np.fmin(m_mredup, lampu['mati_redup'].mf),
                            np.fmax(np.fmin(m_lsedang, lampu['sedang'].mf),
                                    np.fmin(m_terang, lampu['terang'].mf)))
