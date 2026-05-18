@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import streamlit as st
 
 # ==========================================
-# CONFIGURASI HALAMAN STREAMLIT (BONUS)
+# CONFIGURASI HALAMAN STREAMLIT
 # ==========================================
 st.set_page_config(page_title="Responsi IF-A - Smart Greenhouse", layout="wide")
 st.title("Sistem Kendali Otomatis Smart Greenhouse")
@@ -15,50 +15,48 @@ st.markdown("---")
 # ==========================================
 # 1. DEFINISI VARIABEL & SEMESTA PEMBICARAAN
 # ==========================================
-# Variabel Input (Sesuai Ketentuan Soal)
-suhu = ctrl.Antecedent(np.arange(0, 41, 1), 'suhu')            # Rentang Semesta: 0-40
-kelembapan = ctrl.Antecedent(np.arange(0, 101, 1), 'kelembapan') # Rentang Semesta: 0-100
-cahaya = ctrl.Antecedent(np.arange(0, 101, 1), 'cahaya')        # Rentang Semesta: 0-100
+x_suhu = np.arange(0, 41, 1)
+x_kelembapan = np.arange(0, 101, 1)
+x_cahaya = np.arange(0, 101, 1)
 
-# Variabel Output (Sesuai Ketentuan Soal)
-pompa = ctrl.Consequent(np.arange(0, 61, 1), 'pompa')          # Rentang Semesta: 0-60
-kipas = ctrl.Consequent(np.arange(0, 101, 1), 'kipas')        # Rentang Semesta: 0-100
-lampu = ctrl.Consequent(np.arange(0, 101, 1), 'lampu')        # Rentang Semesta: 0-100
+x_pompa = np.arange(0, 61, 1)
+x_kipas = np.arange(0, 101, 1)
+x_lampu = np.arange(0, 101, 1)
 
+suhu = ctrl.Antecedent(x_suhu, 'suhu')
+kelembapan = ctrl.Antecedent(x_kelembapan, 'kelembapan')
+cahaya = ctrl.Antecedent(x_cahaya, 'cahaya')
+
+pompa = ctrl.Consequent(x_pompa, 'pompa')
+kipas = ctrl.Consequent(x_kipas, 'kipas')
+lampu = ctrl.Consequent(x_lampu, 'lampu')
 
 # ==========================================
 # 2. FUNGSI KEANGGOTAAN (MEMBERSHIP FUNCTIONS)
 # ==========================================
-# a. Suhu Lingkungan
-suhu['dingin'] = fuzz.trapmf(suhu.universe, [0, 0, 15, 22])
-suhu['normal'] = fuzz.trimf(suhu.universe, [18, 25, 30])
-suhu['panas'] = fuzz.trapmf(suhu.universe, [27, 32, 40, 40])
+suhu['dingin'] = fuzz.trapmf(x_suhu, [0, 0, 15, 22])
+suhu['normal'] = fuzz.trimf(x_suhu, [18, 25, 30])
+suhu['panas'] = fuzz.trapmf(x_suhu, [27, 32, 40, 40])
 
-# b. Kelembapan Tanah
-kelembapan['kering'] = fuzz.trapmf(kelembapan.universe, [0, 0, 0, 40])
-kelembapan['ideal'] = fuzz.trimf(kelembapan.universe, [30, 50, 70])
-kelembapan['basah'] = fuzz.trapmf(kelembapan.universe, [60, 100, 100, 100])
+kelembapan['kering'] = fuzz.trapmf(x_kelembapan, [0, 0, 0, 40])
+kelembapan['ideal'] = fuzz.trimf(x_kelembapan, [30, 50, 70])
+kelembapan['basah'] = fuzz.trapmf(x_kelembapan, [60, 100, 100, 100])
 
-# c. Cahaya Matahari
-cahaya['gelap'] = fuzz.trapmf(cahaya.universe, [0, 0, 20, 40])
-cahaya['redup'] = fuzz.trimf(cahaya.universe, [30, 50, 70])
-cahaya['terang'] = fuzz.trapmf(cahaya.universe, [60, 90, 100, 100])
+cahaya['gelap'] = fuzz.trapmf(x_cahaya, [0, 0, 20, 40])
+cahaya['redup'] = fuzz.trimf(x_cahaya, [30, 50, 70])
+cahaya['terang'] = fuzz.trapmf(x_cahaya, [60, 90, 100, 100])
 
-# d. Output: Durasi Pompa Air
-pompa['singkat'] = fuzz.trapmf(pompa.universe, [0, 0, 0, 20])
-pompa['sedang'] = fuzz.trimf(pompa.universe, [15, 30, 45])
-pompa['lama'] = fuzz.trapmf(pompa.universe, [40, 60, 60, 60])
+pompa['singkat'] = fuzz.trapmf(x_pompa, [0, 0, 0, 20])
+pompa['sedang'] = fuzz.trimf(x_pompa, [15, 30, 45])
+pompa['lama'] = fuzz.trapmf(x_pompa, [40, 60, 60, 60])
 
-# e. Output: Kipas Exhaust
-kipas['lambat'] = fuzz.trapmf(kipas.universe, [0, 0, 25, 50])
-kipas['sedang'] = fuzz.trimf(kipas.universe, [35, 60, 80])
-kipas['cepat'] = fuzz.trapmf(kipas.universe, [70, 90, 100, 100])
+kipas['lambat'] = fuzz.trapmf(x_kipas, [0, 0, 25, 50])
+kipas['sedang'] = fuzz.trimf(x_kipas, [35, 60, 80])
+kipas['cepat'] = fuzz.trapmf(x_kipas, [70, 90, 100, 100])
 
-# f. Output: Lampu UV
-lampu['mati_redup'] = fuzz.trapmf(lampu.universe, [0, 0, 0, 40])
-lampu['sedang'] = fuzz.trimf(lampu.universe, [20, 50, 80])
-lampu['terang'] = fuzz.trapmf(lampu.universe, [60, 100, 100, 100])
-
+lampu['mati_redup'] = fuzz.trapmf(x_lampu, [0, 0, 0, 40])
+lampu['sedang'] = fuzz.trimf(x_lampu, [20, 50, 80])
+lampu['terang'] = fuzz.trapmf(x_lampu, [60, 100, 100, 100])
 
 # ==========================================
 # 3. ATURAN LOGIKA FUZZY (RULE BASE)
@@ -70,45 +68,35 @@ rule4 = ctrl.Rule(kelembapan['basah'] & suhu['dingin'], [pompa['singkat'], kipas
 rule5 = ctrl.Rule(suhu['normal'] & kelembapan['ideal'] & cahaya['redup'], [pompa['sedang'], kipas['sedang'], lampu['sedang']])
 rule6 = ctrl.Rule(kelembapan['kering'] | cahaya['gelap'], [pompa['lama'], lampu['terang'], kipas['lambat']])
 
-
 # ==========================================
 # 4. SISTEM INFERENSI & KONTROL
 # ==========================================
 greenhouse_ctrl = ctrl.ControlSystem([rule1, rule2, rule3, rule4, rule5, rule6])
 simulasi = ctrl.ControlSystemSimulation(greenhouse_ctrl)
 
-
 # ==========================================
 # 5. INPUT PARAMETER DINAMIS (UI SIDEBAR)
 # ==========================================
 st.sidebar.header("Input Parameter Sensor")
+input_suhu = st.sidebar.slider("Suhu Lingkungan (°C)", 0.0, 40.0, 30.0, step=0.5) [cite: 130]
+input_kelembapan = st.sidebar.slider("Kelembapan Tanah (%)", 0.0, 100.0, 35.0, step=1.0) [cite: 131]
+input_cahaya = st.sidebar.slider("Cahaya Matahari (Lux/100)", 0.0, 100.0, 25.0, step=1.0) [cite: 132]
 
-# Nilai default otomatis diset berdasarkan instruksi soal simulasi:
-# Suhu: 30, Kelembapan: 35, Cahaya: 25
-input_suhu = st.sidebar.slider("Suhu Lingkungan (°C)", 0.0, 40.0, 30.0, step=0.5)
-input_kelembapan = st.sidebar.slider("Kelembapan Tanah (%)", 0.0, 100.0, 35.0, step=1.0)
-input_cahaya = st.sidebar.slider("Cahaya Matahari (Lux/100)", 0.0, 100.0, 25.0, step=1.0)
-
-# Masukkan nilai input ke dalam simulasi
 simulasi.input['suhu'] = input_suhu
 simulasi.input['kelembapan'] = input_kelembapan
 simulasi.input['cahaya'] = input_cahaya
 
-# Jalankan Proses Defuzzifikasi
 simulasi.compute()
 
-# Ambil nilai murni hasil output
-hasil_pompa = simulasi.output['pompa']
-hasil_kipas = simulasi.output['kipas']
-hasil_lampu = simulasi.output['lampu']
-
+hasil_pompa = simulasi.output['pompa'] [cite: 133]
+hasil_kipas = simulasi.output['kipas'] [cite: 133]
+hasil_lampu = simulasi.output['lampu'] [cite: 133]
 
 # ==========================================
 # 6. MENAMPILKAN ANGKA HASIL DEFUZZIFIKASI
 # ==========================================
 st.subheader("Hasil Nilai Defuzzifikasi (Aksi Aktuator)")
 col1, col2, col3 = st.columns(3)
-
 with col1:
     st.metric(label="Durasi Pompa Air", value=f"{hasil_pompa:.2f} Menit")
 with col2:
@@ -118,30 +106,68 @@ with col3:
 
 st.markdown("---")
 
-
 # ==========================================
-# 7. MENAMPILKAN GRAFIK ARSIR OUTPUT
+# 7. VISUALISASI MANUAL (GARANSI MUNCUL)
 # ==========================================
-st.subheader("Grafik Arsir Hasil Defuzzifikasi Pada Kurva Output")
+st.subheader("Grafik Arsir Hasil Defuzzifikasi Pada Kurva Output") [cite: 133]
 
-# Membuat subplot berukuran 3 baris untuk menampung masing-masing grafik output
-fig, (ax0, ax1, ax2) = plt.subplots(nrows=3, figsize=(10, 14))
+# --- PLOT 1: POMPA AIR ---
+fig1, ax1 = plt.subplots(figsize=(8, 3.5))
+# Gambar kurva referensi dasar
+ax1.plot(x_pompa, pompa['singkat'].mf, 'b', linewidth=1.5, label='Singkat')
+ax1.plot(x_pompa, pompa['sedang'].mf, 'g', linewidth=1.5, label='Sedang')
+ax1.plot(x_pompa, pompa['lama'].mf, 'r', linewidth=1.5, label='Lama')
+# Hitung tingkat kecocokan untuk arsir hasil
+m_singkat = fuzz.interp_membership(x_pompa, pompa['singkat'].mf, hasil_pompa)
+m_sedang  = fuzz.interp_membership(x_pompa, pompa['sedang'].mf, hasil_pompa)
+m_lama    = fuzz.interp_membership(x_pompa, pompa['lama'].mf, hasil_pompa)
+# Lakukan pengarsiran area hasil komputasi
+pompa_activation = np.fmax(np.fmin(m_singkat, pompa['singkat'].mf),
+                           np.fmax(np.fmin(m_sedang, pompa['sedang'].mf),
+                                   np.fmin(m_lama, pompa['lama'].mf)))
+ax1.fill_between(x_pompa, 0, pompa_activation, facecolor='Orange', alpha=0.4)
+ax1.axvline(x=hasil_pompa, color='Purple', linestyle='--', linewidth=2, label=f'Hasil: {hasil_pompa:.2f}')
+ax1.set_title("Hasil Defuzzifikasi - Durasi Pompa Air")
+ax1.legend(loc='upper right')
+ax1.grid(True, alpha=0.3)
+st.pyplot(fig1)
 
-# Kurva Output Pompa Air dengan Arsir Hasil
-pompa.view(sim=simulasi, ax=ax0)
-ax0.set_title("Hasil Defuzzifikasi - Durasi Pompa Air", fontsize=12, fontweight='bold')
-ax0.grid(True, linestyle='--', alpha=0.6)
+st.markdown("---")
 
-# Kurva Output Kipas dengan Arsir Hasil
-kipas.view(sim=simulasi, ax=ax1)
-ax1.set_title("Hasil Defuzzifikasi - Kipas Exhaust", fontsize=12, fontweight='bold')
-ax1.grid(True, linestyle='--', alpha=0.6)
+# --- PLOT 2: KIPAS EXHAUST ---
+fig2, ax2 = plt.subplots(figsize=(8, 3.5))
+ax2.plot(x_kipas, kipas['lambat'].mf, 'b', linewidth=1.5, label='Lambat')
+ax2.plot(x_kipas, kipas['sedang'].mf, 'g', linewidth=1.5, label='Sedang')
+ax2.plot(x_kipas, kipas['cepat'].mf, 'r', linewidth=1.5, label='Cepat')
+m_lambat = fuzz.interp_membership(x_kipas, kipas['lambat'].mf, hasil_kipas)
+m_ksedang = fuzz.interp_membership(x_kipas, kipas['sedang'].mf, hasil_kipas)
+m_cepat   = fuzz.interp_membership(x_kipas, kipas['cepat'].mf, hasil_kipas)
+kipas_activation = np.fmax(np.fmin(m_lambat, kipas['lambat'].mf),
+                           np.fmax(np.fmin(m_ksedang, kipas['sedang'].mf),
+                                   np.fmin(m_cepat, kipas['cepat'].mf)))
+ax2.fill_between(x_kipas, 0, kipas_activation, facecolor='Cyan', alpha=0.4)
+ax2.axvline(x=hasil_kipas, color='Purple', linestyle='--', linewidth=2, label=f'Hasil: {hasil_kipas:.2f}')
+ax2.set_title("Hasil Defuzzifikasi - Kipas Exhaust")
+ax2.legend(loc='upper right')
+ax2.grid(True, alpha=0.3)
+st.pyplot(fig2)
 
-# Kurva Output Lampu dengan Arsir Hasil
-lampu.view(sim=simulasi, ax=ax2)
-ax2.set_title("Hasil Defuzzifikasi - Daya Lampu UV", fontsize=12, fontweight='bold')
-ax2.grid(True, linestyle='--', alpha=0.6)
+st.markdown("---")
 
-# Render gambar ke dalam dashboard Streamlit
-plt.tight_layout()
-st.pyplot(fig)
+# --- PLOT 3: LAMPU UV ---
+fig3, ax3 = plt.subplots(figsize=(8, 3.5))
+ax3.plot(x_lampu, lampu['mati_redup'].mf, 'b', linewidth=1.5, label='Mati/Redup')
+ax3.plot(x_lampu, lampu['sedang'].mf, 'g', linewidth=1.5, label='Sedang')
+ax3.plot(x_lampu, lampu['terang'].mf, 'r', linewidth=1.5, label='Terang')
+m_mredup = fuzz.interp_membership(x_lampu, lampu['mati_redup'].mf, hasil_lampu)
+m_lsedang = fuzz.interp_membership(x_lampu, lampu['sedang'].mf, hasil_lampu)
+m_terang  = fuzz.interp_membership(x_lampu, lampu['terang'].mf, hasil_lampu)
+lampu_activation = np.fmax(np.fmin(m_mredup, lampu['mati_redup'].mf),
+                           np.fmax(np.fmin(m_lsedang, lampu['sedang'].mf),
+                                   np.fmin(m_terang, lampu['terang'].mf)))
+ax3.fill_between(x_lampu, 0, lampu_activation, facecolor='Magenta', alpha=0.4)
+ax3.axvline(x=hasil_lampu, color='Purple', linestyle='--', linewidth=2, label=f'Hasil: {hasil_lampu:.2f}')
+ax3.set_title("Hasil Defuzzifikasi - Daya Lampu UV")
+ax3.legend(loc='upper right')
+ax3.grid(True, alpha=0.3)
+st.pyplot(fig3)
